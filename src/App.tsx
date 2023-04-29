@@ -5,11 +5,11 @@ import "./App.css";
 
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: "/questions",
     element: <ListScreen />,
   },
   {
-    path: "about",
+    path: "/about",
     element: <div>About</div>,
   },
 ]);
