@@ -6,7 +6,7 @@ import QuestionsList from "./QuestionsList";
 import { QuestionType } from "../../interfaces";
 
 const initialQuestion: QuestionType = {
-  id: -1,
+  key: -1,
   image_url: "",
   published_at: "",
   question: "",
@@ -42,7 +42,7 @@ const ListScreen = () => {
   return (
     <div>
       {isLoading ? (
-        <LoadingScreen />
+        <LoadingScreen text="Checking server health..." />
       ) : (
         <div>
           {isServerError ? (

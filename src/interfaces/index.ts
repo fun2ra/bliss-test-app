@@ -1,5 +1,5 @@
 export interface QuestionType {
-    id: number,
+    key: number,
     image_url: string,
     published_at: string,
     question: string,

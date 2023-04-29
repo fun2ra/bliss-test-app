@@ -4,10 +4,10 @@ import { Spin } from "antd";
 
 const antIcon = <LoadingOutlined spin />;
 
-const LoadingScreen = () => {
+const LoadingScreen = ({ text }: { text: string }) => {
   return (
     <div className="loading-spin">
-      <div>Checking server health...</div>
+      <div>{text}</div>
       <Spin size="large" indicator={antIcon} />
     </div>
   );
