@@ -22,9 +22,9 @@ const ApiService = {
     );
   },
 
-  getQuestions: async (): Promise<QuestionType[]> => {
+  getQuestions: async (limit: number = 10, offset:number = 0, filter?: string): Promise<QuestionType[]> => {
     const questionsList = await axios.get(
-      `${ApiUrls.baseUrl}/${ApiUrls.endpoints.questions}`
+      `${ApiUrls.baseUrl}/${ApiUrls.endpoints.questions}?limit=${limit}&offset=${offset}${!!filter?`&filter=${filter}`:``}`
     );
 
     return new Promise((resolve) =>

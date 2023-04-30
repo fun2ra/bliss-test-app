@@ -15,3 +15,7 @@ export interface ChoicesType {
 export interface ShareFormType {
     email: string
 }
+
+export interface FilterFormType {
+    filter: string
+}

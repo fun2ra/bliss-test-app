@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import BlissMockApiService from "../../services/BlissMockApiService";
-import { QuestionType, ChoicesType, ShareFormType } from "../../interfaces";
+import { ChoicesType, ShareFormType } from "../../interfaces";
 import LoadingScreen from "../LoadingScreen";
 import { Image, Tooltip, Button, Modal, Form, Input, message } from "antd";
 import {
@@ -10,15 +10,7 @@ import {
   ArrowLeftOutlined,
 } from "@ant-design/icons";
 import { useLocation, useNavigate } from "react-router-dom";
-
-const initialQuestion: QuestionType = {
-  key: -1,
-  image_url: "",
-  published_at: "",
-  question: "",
-  thumb_url: "",
-  choices: [],
-};
+import { mockInitialQuestion as initialQuestion } from "../../mockData";
 
 const validationMessage = {
   required: "${label} is required!",
@@ -95,7 +87,12 @@ const DetailScreen = () => {
         <LoadingScreen text="Loading question's detail..." />
       ) : (
         <div>
-          <Button onClick={() => navigate("/questions")} icon={<ArrowLeftOutlined type="link" />}>Back</Button>
+          <Button
+            onClick={() => navigate("/questions")}
+            icon={<ArrowLeftOutlined type="link" />}
+          >
+            Back
+          </Button>
           <div className="question-card">
             <Image
               src={questionDetail.image_url}

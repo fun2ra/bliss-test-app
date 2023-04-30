@@ -3,21 +3,19 @@ import LoadingScreen from "../LoadingScreen";
 import TryAgain from "../TryAgain";
 import BlissMockApiService from "../../services/BlissMockApiService";
 import QuestionsList from "./QuestionsList";
-import { QuestionType } from "../../interfaces";
-
-const initialQuestion: QuestionType = {
-  key: -1,
-  image_url: "",
-  published_at: "",
-  question: "",
-  thumb_url: "",
-  choices: []
-}
+import { mockInitialQuestion as initialQuestion } from "../../mockData";
+import { Button, Tooltip, Form, Input } from "antd";
+import { RightOutlined, LoadingOutlined } from "@ant-design/icons";
+import { FilterFormType } from "../../interfaces";
 
 const ListScreen = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isServerError, setIsServerError] = useState(false);
-  const [questionList, setQuestionList] = useState([initialQuestion])
+  const [questionList, setQuestionList] = useState([initialQuestion]);
+  const [limit, setLimit] = useState(10);
+  const [offset, setOffset] = useState(0);
+  const [filter, setFilter] = useState("");
+  const [filterLoading, setFilterLoading] = useState(false);
 
   const checkServer = (): Promise<void> =>
     BlissMockApiService.checkServerHealth().then((response) => {
@@ -30,14 +28,26 @@ const ListScreen = () => {
   }, []);
 
   useEffect(() => {
-    if (!isLoading) return;
+    if (filter != "") setFilterLoading(true);
 
-    console.log('checking loading server...', isLoading)
-    BlissMockApiService.getQuestions().then(response => {
-      console.log(response)
-      setQuestionList(response)
-    })
-  }, [isLoading])
+    BlissMockApiService.getQuestions(limit, offset, filter).then((response) => {
+      if (questionList[0] === initialQuestion || filter != "") {
+        // The case of filter it's render the same object getted, not correct backend behavior
+        // The app will not see any change
+        setQuestionList(response);
+      } else {
+        // Here I'm mocking the response because the server it's always returning the same answer
+        // in order to see a variation on the table
+        const offsetQuestionList = [...questionList, ...response];
+        setQuestionList(offsetQuestionList);
+      }
+      setFilterLoading(false)
+    });
+  }, [limit, offset, filter]);
+
+  const handleFilterSubmit = (e: FilterFormType) => {
+    setFilter(e.filter);
+  };
 
   return (
     <div>
@@ -48,7 +58,35 @@ const ListScreen = () => {
           {isServerError ? (
             <TryAgain tryAgain={checkServer} />
           ) : (
-            <QuestionsList questions={questionList} />
+            <div>
+              <div className="filter-form">
+                <div>
+                  <Form layout="inline" onFinish={handleFilterSubmit}>
+                    <Form.Item label="Filter" name={["filter"]}>
+                      <Input />
+                    </Form.Item>
+                    <Form.Item>
+                      <Button
+                        type="primary"
+                        htmlType="submit"
+                        icon={filterLoading && <LoadingOutlined />}
+                      >
+                        Submit
+                      </Button>
+                    </Form.Item>
+                  </Form>
+                </div>
+                <Tooltip title="Fetch next questions">
+                  <Button
+                    type="primary"
+                    shape="circle"
+                    icon={<RightOutlined />}
+                    onClick={() => setOffset((offset) => offset + 1)}
+                  ></Button>
+                </Tooltip>
+              </div>
+              <QuestionsList questions={questionList} />
+            </div>
           )}
         </div>
       )}
