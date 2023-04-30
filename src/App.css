@@ -24,12 +24,12 @@
   display: flex;
   justify-content: space-between;
   gap: 12px;
+  margin-top: 12px;
 }
 
-@media (max-width: 600px) {
-  .question-card {
-    flex-direction: column;
-  }
+.question-image {
+  border: solid 2px #1890ff;
+  border-radius: 4px;
 }
 
 .question-name {
@@ -67,11 +67,21 @@
 }
 
 .share-question {
-  margin-top: 24px;
+  margin-top: 32px;
+}
+
+.share-title {
   font-size: 18px;
-  color: #1890ff;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.back-button {
+  margin-bottom: 24px;
+}
+
+@media (max-width: 600px) {
+  .question-card {
+    flex-direction: column;
+    align-items: center;
+  }
 }

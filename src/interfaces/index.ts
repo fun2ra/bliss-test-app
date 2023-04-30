@@ -11,3 +11,7 @@ export interface ChoicesType {
     choice: string, 
     votes: number
 }
+
+export interface ShareFormType {
+    email: string
+}

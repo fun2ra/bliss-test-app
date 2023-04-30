@@ -59,9 +59,7 @@ const QuestionList = ({ questions }: { questions: QuestionType[] }) => {
       dataSource={questions}
       onRow={(record) => {
         return {
-          onClick: () => {
-            navigate(`/questions/${record.key}`);
-          },
+          onClick: () => navigate(`/questions/${record.key}`),
         };
       }}
     />

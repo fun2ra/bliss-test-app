@@ -1,9 +1,15 @@
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import BlissMockApiService from "../../services/BlissMockApiService";
-import { QuestionType, ChoicesType } from "../../interfaces";
+import { QuestionType, ChoicesType, ShareFormType } from "../../interfaces";
 import LoadingScreen from "../LoadingScreen";
-import { Image, Tooltip } from "antd";
-import { LikeOutlined, ShareAltOutlined } from "@ant-design/icons";
+import { Image, Tooltip, Button, Modal, Form, Input, message } from "antd";
+import {
+  PlusCircleOutlined,
+  ShareAltOutlined,
+  LoadingOutlined,
+  ArrowLeftOutlined,
+} from "@ant-design/icons";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const initialQuestion: QuestionType = {
   key: -1,
@@ -14,9 +20,21 @@ const initialQuestion: QuestionType = {
   choices: [],
 };
 
+const validationMessage = {
+  required: "${label} is required!",
+  types: {
+    email: "This is not a valid email!",
+  },
+};
+
 const DetailScreen = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [questionDetail, setQuestionDetail] = useState(initialQuestion);
+  const [isShare, setIsShare] = useState(false);
+  const [isShareLoading, setIsShareLoading] = useState(false);
+  const { pathname } = useLocation();
+  const [messageApi, contextHolder] = message.useMessage();
+  const navigate = useNavigate();
 
   useEffect(() => {
     BlissMockApiService.getQuestionById(1).then((response) => {
@@ -30,9 +48,8 @@ const DetailScreen = () => {
     [questionDetail.published_at]
   );
 
-  const onVote = useCallback(
+  const handleVote = useCallback(
     (ch: ChoicesType) => {
-      console.log(ch);
       const updatedQuestion = {
         ...questionDetail,
         choices: questionDetail.choices.map((chx) => {
@@ -43,13 +60,33 @@ const DetailScreen = () => {
           }
         }),
       };
-      console.log(updatedQuestion);
       BlissMockApiService.updateQuestion(
         questionDetail.key,
         updatedQuestion
-      ).then((response) => setQuestionDetail(updatedQuestion));
+      ).then((response) => {
+        // here backend it's not working properly, insted of render updatedQuestion object should be used response
+        setQuestionDetail(updatedQuestion);
+      });
     },
     [questionDetail]
+  );
+
+  const handleShare = useCallback(
+    (form: ShareFormType) => {
+      setIsShareLoading(true);
+      BlissMockApiService.shareQuestionByEmail(form.email, pathname).then(
+        (response) => {
+          if (response === true) {
+            messageApi.success("Question shared successfully");
+          } else {
+            messageApi.error("Some error occurred");
+          }
+          setIsShareLoading(false);
+          setIsShare(false);
+        }
+      );
+    },
+    [BlissMockApiService.shareQuestionByEmail]
   );
 
   return (
@@ -58,11 +95,12 @@ const DetailScreen = () => {
         <LoadingScreen text="Loading question's detail..." />
       ) : (
         <div>
+          <Button onClick={() => navigate("/questions")} icon={<ArrowLeftOutlined type="link" />}>Back</Button>
           <div className="question-card">
             <Image
               src={questionDetail.image_url}
               width={200}
-              style={{ border: "solid 2px #1890ff", borderRadius: "4px" }}
+              className="question-image"
             />
             <div>
               <div className="question-name">{questionDetail.question}</div>
@@ -74,8 +112,8 @@ const DetailScreen = () => {
                     <div className="choice-votes">
                       <div>votes: {ch.votes}</div>
                       <Tooltip title="vote your self for this answer">
-                        <LikeOutlined
-                          onClick={() => onVote(ch)}
+                        <PlusCircleOutlined
+                          onClick={() => handleVote(ch)}
                           style={{
                             color: "#1890ff",
                             fontSize: "16px",
@@ -90,8 +128,46 @@ const DetailScreen = () => {
             </div>
           </div>
           <div className="share-question">
-            <ShareAltOutlined />
-            <div>Share this question with a friend</div>
+            <Button
+              type="primary"
+              icon={<ShareAltOutlined />}
+              onClick={() => setIsShare(true)}
+            >
+              Share this question with a friend
+            </Button>
+            <Modal
+              title="Share question"
+              open={isShare}
+              onCancel={() => setIsShare(false)}
+              footer={[
+                <Button onClick={() => setIsShare(false)}>Cancel</Button>,
+                <Button
+                  type="primary"
+                  form="shareForm"
+                  key="submit"
+                  htmlType="submit"
+                  icon={isShareLoading && <LoadingOutlined />}
+                >
+                  Submit
+                </Button>,
+              ]}
+            >
+              {contextHolder}
+              <div className="share-title">Enter the email of your friend</div>
+              <Form
+                validateMessages={validationMessage}
+                id="shareForm"
+                onFinish={handleShare}
+              >
+                <Form.Item
+                  label="Email"
+                  name={["email"]}
+                  rules={[{ type: "email", required: true }]}
+                >
+                  <Input />
+                </Form.Item>
+              </Form>
+            </Modal>
           </div>
         </div>
       )}

@@ -3,9 +3,11 @@ import { QuestionType } from "../../interfaces";
 
 const ApiUrls = {
   baseUrl: process.env.REACT_APP_BASE_URL,
+  hostUrl: process.env.REACT_APP_HOST,
   endpoints: {
     health: "/health",
     questions: "/questions",
+    share: "/share",
   },
 };
 
@@ -19,6 +21,7 @@ const ApiService = {
       resolve(serverHealth.data?.status === "OK")
     );
   },
+
   getQuestions: async (): Promise<QuestionType[]> => {
     const questionsList = await axios.get(
       `${ApiUrls.baseUrl}/${ApiUrls.endpoints.questions}`
@@ -35,6 +38,7 @@ const ApiService = {
       )
     );
   },
+
   getQuestionById: async (question_id: number): Promise<QuestionType> => {
     const questionById = await axios.get(
       `${ApiUrls.baseUrl}/${ApiUrls.endpoints.questions}/${question_id}`
@@ -42,6 +46,7 @@ const ApiService = {
 
     return new Promise((resolve) => resolve(questionById.data));
   },
+
   updateQuestion: async (
     question_id: number,
     data: QuestionType
@@ -52,6 +57,21 @@ const ApiService = {
     );
 
     return new Promise((resolve) => resolve(updateQuestionById.data));
+  },
+
+  shareQuestionByEmail: async (
+    destination_email: string,
+    pathname: string
+  ): Promise<boolean> => {
+    const content_url = `${ApiUrls.hostUrl}${pathname}`;
+    console.log(content_url);
+    const shareQuestion = await axios.post(
+      `${ApiUrls.baseUrl}/${ApiUrls.endpoints.share}?destination_email=${destination_email}&content_url=${content_url}`
+    );
+
+    return new Promise((resolve) =>
+      resolve(shareQuestion.data?.status === "OK")
+    );
   },
 };
 
